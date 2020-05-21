@@ -1,0 +1,13 @@
+name: HappyIRL_Headflip
+version: 1.0
+main: de.happyirl.headflip.Main
+
+commands:
+   headflip:
+      description: Lets player coinflip for all their values!
+      aliases: [hf]
+      permission: permission.headflip
+      
+permissions:
+   permission.headflip:
+      default: true

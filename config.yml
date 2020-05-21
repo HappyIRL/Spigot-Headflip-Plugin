@@ -1,0 +1,143 @@
+#Format:
+   #Everything that has a # in front, means it is a comment and does not affect this plugin.
+   #If you want to use spaces before or after your text, you must use ' '.
+   #If you do not have -Dfile.encoding=UTF8 in your starting arguments, you also must use ' ' to get proper results on color codes.
+   #If you use ' ' you must double every ' that you use. That means can't becomes can''t.
+   #If you want to use colors for your text, use §<index>. To see all possible colors visit: https://www.digminecraft.com/lists/color_list_pc.php
+   #If you want to know why you need to keep this format visit: [https://bukkit.gamepedia.com/Configuration_API_Reference] and [https://stackoverflow.com/questions/32004900/keep-spaces-with-yaml]
+
+headflip:
+   
+   
+   #Name: noPermission
+   #RawProduct: Sender + CustomString
+   #The respond the player gets if he has no permission to use any headflip command.
+   
+   noPermission: ', §cyou can''t do that!'
+   
+   
+   #Name: toManyParameters
+   #RawProduct: Sender + CustomString
+   #The respond the player gets if he has input to many parameters after the command.
+
+   toManyParameters: ', §cuse /headflip <name> / accept!'
+   
+   
+   #Name: nonPlayer
+   #RawProduct: Sender + CustomString
+   #The respond the console or a command-block gets on using the command.
+
+   nonPlayer: ', §cthis command is limited to players only'
+   
+   
+   #Name: noWager
+   #RawProduct: CustomString
+   #The respond the player gets on trying to headflip air.
+
+   noWager: '§cYou can''t headflip air!'
+   
+   
+   #Name: headflipInventoryName
+   #RawProduct: CustomString
+   #The name of the headflip inventory.
+
+   headflipInventoryName: '§cHeadflip Menu'
+   
+   
+   #Name: headflipAnimationName
+   #RawProduct: CustomString
+   #The name of the headflip inventory.
+
+   headflipAnimationName: '§bHeadflip'
+   
+   
+   #Name: cancelledHeadflip
+   #RawProduct: CustomString
+   #The respond both players get when one of them cancels the headflip.
+
+   cancelledHeadflip: '§cThe headflip was cancelled!'
+   
+   
+   #Name: mustCollect
+   #RawProduct: CustomString
+   #The respond players get if they didn't collect their winnings.
+
+   mustCollect: '§cYou must collect your winnings before starting a new headflip!'
+   
+   
+   #Name: hasCollected
+   #RawProduct: CustomString
+   #The respond players get if they collect their winnings or wager.
+
+   hasCollected: '§bYour items have been deposited into your inventory!'
+   
+   
+   #Name: collectAir
+   #RawProduct: CustomString
+   #The respond players get if they try to collect air.
+
+   collectAir: '§cYou have nothing to collect!'
+   
+   
+   #Name: headflipSelf
+   #RawProduct: CustomString
+   #The respond players get if they try to headflip themself.
+
+   headflipSelf: '§cYou can''t headflip yourself!'
+   
+   
+   #Name: headflipSent
+   #RawProduct: CustomString + Target
+   #The respond players get if he try to headflip someone.
+
+   headflipSent: '§bYour headflip request was sent to '
+   
+   
+   #Name: headflipRequest
+   #RawProduct: Sender + CustomString
+   #The message the target gets if someone tries to headflip them.
+
+   headflipRequest: ' §bwants to headflip you! You have 30 seconds to accept the headflip with /headflip accept. Good luck ;)!'
+   
+   
+   #Name: notFound
+   #RawProduct: CustomString
+   #The respond players get if they try to headflip someone offline.
+
+   notFound: '§cCouldn''t find that player. He is either offline or doesn''t exist!'
+   
+   
+   #Name: noRequest
+   #RawProduct: Sender + CustomString
+   #The respond players get if they try to accept without a pending request.
+
+   noRequest: ', §cyou have no pending headflip request!'
+   
+   
+   #Name: noSpace
+   #RawProduct: CustomString
+   #The respond players get if they try to collect without space for their items.
+
+   noSpace: '§cYou do not have anything space for your items!'
+   
+   
+   #Name: headflipWin
+   #RawProduct: CustomString
+   #The respond players get if they win.
+
+   headflipWin: '§bYou win! §cYou can collect your winnings with /headflip collect!'
+   
+   
+   #Name: headflipLose
+   #RawProduct: CustomString
+   #The respond players get if they lose.
+
+   headflipLose: '§bYou lost!'
+   
+   
+   #Name: permission
+   #RawProduct: CustomString
+   #The name of the headflip permission. It will come here and look if the player has this permission.
+
+   permission: 'permission.headflip'
+   
