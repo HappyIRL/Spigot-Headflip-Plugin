@@ -6,8 +6,3 @@ commands:
    headflip:
       description: Lets player coinflip for all their values!
       aliases: [hf]
-      permission: permission.headflip
-      
-permissions:
-   permission.headflip:
-      default: true

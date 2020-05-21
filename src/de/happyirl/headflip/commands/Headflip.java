@@ -57,6 +57,7 @@ public class Headflip implements Listener
 	private boolean ReadyPlayer2 = false;
 	private boolean cancelledHeadflip = true;
 	private boolean startedHeadflip = false;
+	private boolean finalClose = false;
 	
 	private final int[] player1Slots = {9,10,11,12,18,19,20,21};
 	private final int[] player2Slots = {14,15,16,17,23,24,25,26};
@@ -69,6 +70,7 @@ public class Headflip implements Listener
 	
 	private HeadflipsHandler headflipsHandler;
 	private Main main;
+	private Headflip headflip;
 	
 	private List<BukkitTask> openInventoryTasks = new ArrayList<BukkitTask>();
 	
@@ -88,6 +90,7 @@ public class Headflip implements Listener
 		this.headflipsHandler = headflipsHandler;
 		this.player1UUID = player1;
 		this.player2UUID = player2;
+		headflip = this;
 		this.player1 = Bukkit.getPlayer(this.player1UUID);
 		this.player2 = Bukkit.getPlayer(this.player2UUID);
 		greenGlass = createColoredItem(Material.STAINED_GLASS_PANE,1,5);
@@ -235,6 +238,7 @@ public class Headflip implements Listener
 		UUID clickerUUID = clicker.getUniqueId();
 		switch(interaction)
 		{
+			
 			case GRAB_P1:
 				if(clickerUUID.equals(player1UUID))
 				{
@@ -307,6 +311,8 @@ public class Headflip implements Listener
 					}
 					tryStartHeadflip();
 				}
+				break;
+			default:
 				break;
 		}
 		
@@ -387,62 +393,82 @@ public class Headflip implements Listener
 	@EventHandler
 	public void onInventoryClose(InventoryCloseEvent event)
 	{
-		if(event.getInventory().equals(headflipInventory) && cancelledHeadflip)
+		if(!finalClose)
 		{
-			HandlerList.unregisterAll(this);
-			List<ItemStack> player1Wager = new ArrayList<ItemStack>();
-			List<ItemStack> player2Wager = new ArrayList<ItemStack>();
-			for(int i : player1Slots)
+			if(event.getInventory().equals(headflipInventory) && cancelledHeadflip)
 			{
-				ItemStack item = headflipInventory.getItem(i);
-				if(item != null && item.getType() != Material.AIR)
+				finalClose = true;
+				List<ItemStack> player1Wager = new ArrayList<ItemStack>();
+				List<ItemStack> player2Wager = new ArrayList<ItemStack>();
+				for(int i : player1Slots)
 				{
-					player1Wager.add(item);
+					ItemStack item = headflipInventory.getItem(i);
+					if(item != null && item.getType() != Material.AIR)
+					{
+						player1Wager.add(item);
+					}
 				}
-			}
-			for(int i : player2Slots)
-			{
-				ItemStack item = headflipInventory.getItem(i);
-				if(item != null && item.getType() != Material.AIR)
+				for(int i : player2Slots)
 				{
-					player2Wager.add(item);
+					ItemStack item = headflipInventory.getItem(i);
+					if(item != null && item.getType() != Material.AIR)
+					{
+						player2Wager.add(item);
+					}
 				}
-			}
-			if(player1Wager.size() > 0)
-			{
-				headflipsHandler.addCollectionItems(player1UUID, player1Wager);
-			}
-			if(player2Wager.size() > 0)
-			{
-				headflipsHandler.addCollectionItems(player2UUID, player2Wager);
-			}
-			player2.sendMessage(cancelHeadflip);
-			player1.sendMessage(cancelHeadflip);
-			player2.closeInventory();
-			player1.closeInventory();
-		}
-		else if(event.getInventory().equals(headflipAnimation) && startedHeadflip)
-		{
-			BukkitTask openInventory = Bukkit.getScheduler().runTaskLater(main, new Runnable()
-			{
-				@Override
-				public void run()
+				if(player1Wager.size() > 0)
 				{
-					player2.openInventory(headflipAnimation);
-					player1.openInventory(headflipAnimation);
+					headflipsHandler.addCollectionItems(player1UUID, player1Wager);
 				}
-				
-			},20);
-			openInventoryTasks.add(openInventory);
-		}
-		else if(event.getInventory().equals(headflipAnimation))
-		{
-			for(BukkitTask bukkitTask : openInventoryTasks)
-			{
-				bukkitTask.cancel();
+				if(player2Wager.size() > 0)
+				{
+					headflipsHandler.addCollectionItems(player2UUID, player2Wager);
+				}
+				player2.sendMessage(cancelHeadflip);
+				player1.sendMessage(cancelHeadflip);
+				player2.closeInventory();
+				player1.closeInventory();
+				Bukkit.getScheduler().runTaskLater(main, new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						HandlerList.unregisterAll(headflip);
+					}
+					
+				},20);
 			}
-			openInventoryTasks.clear();
-			HandlerList.unregisterAll(this);
+			else if(event.getInventory().equals(headflipAnimation) && startedHeadflip)
+			{
+				BukkitTask openInventory = Bukkit.getScheduler().runTaskLater(main, new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						player2.openInventory(headflipAnimation);
+						player1.openInventory(headflipAnimation);
+					}
+					
+				},20);
+				openInventoryTasks.add(openInventory);
+			}
+			else if(event.getInventory().equals(headflipAnimation))
+			{
+				for(BukkitTask bukkitTask : openInventoryTasks)
+				{
+					bukkitTask.cancel();
+				}
+				openInventoryTasks.clear();
+				Bukkit.getScheduler().runTaskLater(main, new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						HandlerList.unregisterAll(headflip);
+					}
+					
+				},20);
+			}
 		}
 	}
 	@EventHandler

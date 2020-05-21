@@ -90,10 +90,10 @@ public class MyRunnable extends BukkitRunnable
 					headflipAnimation.setContents(animation1Content);
 				}
 				content1 = !content1;
-				playRotationSound(player1);
-				playRotationSound(player2);
 				player1.updateInventory();
 				player2.updateInventory();
+				playRotationSound(player1);
+				playRotationSound(player2);
 				count--;
 			}
 			else

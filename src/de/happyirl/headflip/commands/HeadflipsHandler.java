@@ -1,13 +1,11 @@
 package de.happyirl.headflip.commands;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.apache.commons.lang.time.DateUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
@@ -42,48 +40,23 @@ public class HeadflipsHandler implements Listener
 	}
 	public void newHeadflipRequest(Player source, Player target) 
 	{
-		Date date = new Date();
 		UUID targetUUID = target.getUniqueId();
 		UUID sourceUUID = source.getUniqueId();
 		
-		RemoveAllHeadflipData(sourceUUID);
-		
-		
-		headflips.add(new HeadflipRequestData(sourceUUID, targetUUID, date));
-		
-		
+		headflips.add(new HeadflipRequestData(sourceUUID, targetUUID, this, main));
 	}
-	private void RemoveAllHeadflipData(UUID sourceUUID)
+	public void RemoveAllHeadflipData(HeadflipRequestData headflipRequestData)
 	{
-		for(int i = 0; i < headflips.size(); i++)
-		{
-			HeadflipRequestData current = headflips.get(i);
-			if(current.source.equals(sourceUUID)) 
-			{
-				headflips.remove(i);
-				i--;
-			}
-		}
+		headflips.remove(headflipRequestData);
 	}
 	
-	private HeadflipRequestData findHeadflip(UUID accepterUUID)
+	public HeadflipRequestData findHeadflip(UUID playerUUID)
 	{
-		for(int i = 0; i < headflips.size(); i++)
+		for(HeadflipRequestData headflipRequestData : headflips)
 		{
-			HeadflipRequestData current = headflips.get(i);
-			Date ticketExpired = DateUtils.addMinutes(new Date(), -30);
-			if(current.date.after(ticketExpired))
+			if(headflipRequestData.target.equals(playerUUID) || headflipRequestData.source.equals(playerUUID))
 			{
-				if(current.target.equals(accepterUUID))
-				{
-					headflips.remove(i);
-					return current;
-				}
-			}
-			else
-			{
-				headflips.remove(i);
-				i--;
+				return headflipRequestData;
 			}
 		}
 		return null;
@@ -97,10 +70,14 @@ public class HeadflipsHandler implements Listener
 		{
 			accepter.sendMessage("§e" + accepter.getName() + noRequest);
 		}
+		else if(accepterUUID.equals(currentHeadflip.source))
+		{
+			return;
+		}
 		else
 		{
 			Player source = Bukkit.getPlayer(currentHeadflip.source);
-			if(accepter != null && source != null)
+			if(source != null)
 			{
 				Headflip headflip = new Headflip(this,accepterUUID, currentHeadflip.source, main);
 				main.addListener(headflip);
@@ -109,6 +86,7 @@ public class HeadflipsHandler implements Listener
 			{
 				accepter.sendMessage(notFound);
 			}
+			RemoveAllHeadflipData(currentHeadflip);
 		}
 		
 	}

@@ -100,6 +100,13 @@ headflip:
    headflipRequest: ' §bwants to headflip you! You have 30 seconds to accept the headflip with /headflip accept. Good luck ;)!'
    
    
+   #Name: requestTimeout
+   #RawProduct: CustomString
+   #The message the player gets if the target didn't accept in time.
+
+   requestTimeout: '§cYour headflip request ran out!'
+   
+   
    #Name: notFound
    #RawProduct: CustomString
    #The respond players get if they try to headflip someone offline.
@@ -109,9 +116,16 @@ headflip:
    
    #Name: noRequest
    #RawProduct: Sender + CustomString
-   #The respond players get if they try to accept without a pending request.
+   #The respond players get if they try to accept or deny without a pending request.
 
    noRequest: ', §cyou have no pending headflip request!'
+   
+   
+   #Name: headflipDenied
+   #RawProduct: Sender + CustomString
+   #The respond players get if they successfully denied their pending headflip requests.
+
+   headflipDenied: ', §byou have denied your pending request!'
    
    
    #Name: noSpace

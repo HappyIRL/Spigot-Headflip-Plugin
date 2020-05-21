@@ -10,6 +10,8 @@ public class HeadflipCommand extends CustomCommand
 	private HeadflipsHandler headflips;
 	
 	private final String mustCollect;
+	private final String noRequest;
+	private final String headflipDenied;
 	private final String collectAir;
 	private final String headflipSelf;
 	private final String headflipSent;
@@ -21,6 +23,8 @@ public class HeadflipCommand extends CustomCommand
         super(config);
         this.headflips = headflips;
         this.mustCollect = config.getString("headflip.mustCollect");
+        this.noRequest = config.getString("headflip.noRequest");
+        this.headflipDenied = config.getString("headflip.headflipDenied");
         this.collectAir = config.getString("headflip.collectAir");
         this.headflipSelf = config.getString("headflip.headflipSelf");
         this.headflipSent = config.getString("headflip.headflipSent");
@@ -48,6 +52,19 @@ public class HeadflipCommand extends CustomCommand
 			}
 			
 		}
+		else if(arg.equalsIgnoreCase("deny"))
+		{
+			HeadflipRequestData currentHeadflip = headflips.findHeadflip(source.getUniqueId());
+			if(currentHeadflip != null)
+			{
+				headflips.RemoveAllHeadflipData(currentHeadflip);
+				source.sendMessage("§e" + source.getName() + headflipDenied);
+			}
+			else
+			{
+				source.sendMessage("§e" + source.getName() + noRequest);
+			}
+		}
 		else if(arg.equalsIgnoreCase("collect"))
 		{
 			if(headflips.headflipPlayerStorage.containsKey(source.getUniqueId()))
@@ -74,9 +91,13 @@ public class HeadflipCommand extends CustomCommand
 			}
 			if (target != null)
 			{
-				headflips.newHeadflipRequest(source, target);
-				source.sendMessage(headflipSent + "§e" + target.getName());
-				target.sendMessage("§e" + source.getName() + headflipRequest);
+				HeadflipRequestData currentHeadflip = headflips.findHeadflip(source.getUniqueId());
+				if(currentHeadflip == null)
+				{
+					headflips.newHeadflipRequest(source, target);
+					source.sendMessage(headflipSent + "§e" + target.getName());
+					target.sendMessage("§e" + source.getName() + headflipRequest);
+				}
 			}
 			else
 			{
