@@ -30,6 +30,7 @@ public class HeadflipCommand extends CustomCommand
         this.headflipSent = config.getString("headflip.headflipSent");
         this.headflipRequest = config.getString("headflip.headflipRequest");
         this.notFound = config.getString("headflip.notFound");
+        
         permission = config.getString("headflip.permission");
         playerOnly = true;
         parameters = 1;
@@ -40,69 +41,94 @@ public class HeadflipCommand extends CustomCommand
 	{
 		String arg = args[0];
 		
-		if(arg.equalsIgnoreCase("accept"))
+		switch(arg) 
 		{
-			if(!headflips.headflipPlayerStorage.containsKey(source.getUniqueId()))
-			{
-				headflips.tryAcceptHeadflip(source);
-			}
-			else
-			{
-				source.sendMessage(mustCollect);
-			}
+			case "accept":
+				executeAccept(source);
+				break;
+				
+			case "deny":
+				executeDeny(source);
+				break;
 			
+			case "collect":
+				executeCollect(source);
+				break;
+			
+			default:
+				executePlayer(source, arg);
+				break;
 		}
-		else if(arg.equalsIgnoreCase("deny"))
+
+	}
+
+	private void executePlayer(Player source, String arg) 
+	{
+		Player target = Bukkit.getPlayer(arg);
+		if(source.equals(target))
 		{
-			HeadflipRequestData currentHeadflip = headflips.findHeadflip(source.getUniqueId());
-			if(currentHeadflip != null)
-			{
-				headflips.RemoveAllHeadflipData(currentHeadflip);
-				source.sendMessage("§e" + source.getName() + headflipDenied);
-			}
-			else
-			{
-				source.sendMessage("§e" + source.getName() + noRequest);
-			}
+			source.sendMessage(headflipSelf);
+			return;
 		}
-		else if(arg.equalsIgnoreCase("collect"))
+		
+		if(headflips.playerStorageContains(source.getUniqueId()))
 		{
-			if(headflips.headflipPlayerStorage.containsKey(source.getUniqueId()))
+			source.sendMessage(mustCollect);
+			return;
+		}
+		
+		if (target != null)
+		{
+			HeadflipRequestData currentHeadflip = headflips.findHeadflipCreatedBy(source.getUniqueId());
+			if(currentHeadflip == null)
 			{
-				headflips.collectHeadflip(source);
+				headflips.addHeadflipRequest(source, target);
+				source.sendMessage(headflipSent + "§e" + target.getName());
+				target.sendMessage("§e" + source.getName() + headflipRequest);
 			}
-			else
-			{
-				source.sendMessage(collectAir);
-			}
+			//Tell player he can only do 1 headflip request at the time
 		}
 		else
 		{
-			Player target = Bukkit.getPlayer(arg);
-			if(source.equals(target))
-			{
-				source.sendMessage(headflipSelf);
-				return;
-			}
-			if(headflips.headflipPlayerStorage.containsKey(source.getUniqueId()))
-			{
-				source.sendMessage(mustCollect);
-				return;
-			}
-			if (target != null)
-			{
-				HeadflipRequestData currentHeadflip = headflips.findHeadflip(source.getUniqueId());
-				if(currentHeadflip == null)
-				{
-					headflips.newHeadflipRequest(source, target);
-					source.sendMessage(headflipSent + "§e" + target.getName());
-					target.sendMessage("§e" + source.getName() + headflipRequest);
-				}
-			}
-			else
-			{
-				source.sendMessage(notFound);
-			}
+			source.sendMessage(notFound);
+		}
+	}
+
+	private void executeCollect(Player source) 
+	{
+		if(headflips.playerStorageContains(source.getUniqueId()))
+		{
+			headflips.tryCollectHeadflip(source);
+		}
+		else
+		{
+			source.sendMessage(collectAir);
+		}
+	}
+
+	private void executeDeny(Player source) 
+	{
+		HeadflipRequestData currentHeadflip = headflips.findHeadflipFor(source.getUniqueId());
+		if(currentHeadflip != null)
+		{
+			headflips.removeRequest(currentHeadflip);
+			source.sendMessage("§e" + source.getName() + headflipDenied);
+		}
+		else
+		{
+			source.sendMessage("§e" + source.getName() + noRequest);
+		}
+	}
+
+	private void executeAccept(Player source) 
+	{
+		if(!headflips.playerStorageContains(source.getUniqueId()))
+		{
+			headflips.tryAcceptHeadflip(source);
+		}
+		else
+		{
+			source.sendMessage(mustCollect);
 		}
 	}
 }

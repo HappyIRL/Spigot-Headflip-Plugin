@@ -5,28 +5,27 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import de.happyirl.headflip.commands.CustomCommand;
 import de.happyirl.headflip.commands.HeadflipCommand;
 import de.happyirl.headflip.commands.HeadflipsHandler;
 
-public class Main extends JavaPlugin
+public class HeadflipPlugin extends JavaPlugin
 {
 	private final String Headflip_Command = "headflip";
-	public FileConfiguration config;
+	private FileConfiguration config;
 	
 	public void onEnable()
 	{
 		saveDefaultConfig();
 		config = getConfig();
 		
-		HeadflipsHandler headflips = new HeadflipsHandler(this);
-		new CustomCommand(config);
+		HeadflipsHandler headflipHandler = new HeadflipsHandler(this);
 		
-		getCommand(Headflip_Command).setExecutor(new HeadflipCommand(headflips, config));
+		getCommand(Headflip_Command).setExecutor(new HeadflipCommand(headflipHandler, config));
 
-		addListener(headflips);
+		addListener(headflipHandler);
 		
 	}
+	
 	public void addListener(Listener listener)
 	{
 		Bukkit.getPluginManager().registerEvents(listener, this);

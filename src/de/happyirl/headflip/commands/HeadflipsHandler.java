@@ -7,64 +7,106 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 
-import de.happyirl.headflip.Main;
+import de.happyirl.headflip.HeadflipPlugin;
 
 public class HeadflipsHandler implements Listener
 {
 	private List<HeadflipRequestData> headflips;
-	public Map<UUID, List<ItemStack>> headflipPlayerStorage;
-	private Main main;
+	private Map<UUID, List<ItemStack>> headflipPlayerStorage;
+	private HeadflipPlugin plugin;
 	
 	private final String noRequest;
 	private final String notFound;
 	private final String noSpace;
 	private final String hasCollected;
+	private final String requestTimeout;
 	
-	public HeadflipsHandler(Main main)
+	public HeadflipsHandler(HeadflipPlugin plugin)
 	{
-		this.main = main;
-		this.noRequest = main.config.getString("headflip.noRequest");
-		this.notFound = main.config.getString("headflip.notFound");
-		this.noSpace = main.config.getString("headflip.noSpace");
-		this.hasCollected = main.config.getString("headflip.hasCollected");
+		this.plugin = plugin;
+		FileConfiguration config = plugin.getConfig();
+		this.noRequest = config.getString("headflip.noRequest");
+		this.notFound = config.getString("headflip.notFound");
+		this.noSpace = config.getString("headflip.noSpace");
+		this.hasCollected = config.getString("headflip.hasCollected");
+		this.requestTimeout = config.getString("headflip.requestTimeout");
+		
 		headflipPlayerStorage = new HashMap<UUID, List<ItemStack>>();
 		headflips = new ArrayList<HeadflipRequestData>();
 	}
-	public void addCollectionItems(UUID user, List<ItemStack> cache)
+	
+	public boolean playerStorageContains(UUID id) 
+	{
+		return headflipPlayerStorage.containsKey(id);
+	}
+	
+	public void storeItems(UUID user, List<ItemStack> cache)
 	{
 		headflipPlayerStorage.put(user, cache);
 	}
-	public void newHeadflipRequest(Player source, Player target) 
+	
+	public void addHeadflipRequest(Player source, Player target) 
 	{
 		UUID targetUUID = target.getUniqueId();
 		UUID sourceUUID = source.getUniqueId();
 		
-		headflips.add(new HeadflipRequestData(sourceUUID, targetUUID, this, main));
+		headflips.add(new HeadflipRequestData(sourceUUID, targetUUID));
+		
+		Bukkit.getScheduler().runTaskLater(plugin, new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				HeadflipRequestData currentHeadflip = findHeadflipCreatedBy(sourceUUID);
+				
+				if(currentHeadflip != null)
+				{
+					removeRequest(currentHeadflip);
+					Bukkit.getPlayer(sourceUUID).sendMessage(requestTimeout);
+				}
+			}
+			
+		},600);
 	}
-	public void RemoveAllHeadflipData(HeadflipRequestData headflipRequestData)
+
+	public void removeRequest(HeadflipRequestData headflipRequestData)
 	{
 		headflips.remove(headflipRequestData);
 	}
 	
-	public HeadflipRequestData findHeadflip(UUID playerUUID)
+	public HeadflipRequestData findHeadflipFor(UUID playerUUID)
 	{
 		for(HeadflipRequestData headflipRequestData : headflips)
 		{
-			if(headflipRequestData.target.equals(playerUUID) || headflipRequestData.source.equals(playerUUID))
+			if(headflipRequestData.target.equals(playerUUID))
 			{
 				return headflipRequestData;
 			}
 		}
 		return null;
 	}
+	
+	public HeadflipRequestData findHeadflipCreatedBy(UUID playerUUID)
+	{
+		for(HeadflipRequestData headflipRequestData : headflips)
+		{
+			if(headflipRequestData.source.equals(playerUUID))
+			{
+				return headflipRequestData;
+			}
+		}
+		return null;
+	}
+	
 	public void tryAcceptHeadflip(Player accepter)
 	{
 		UUID accepterUUID = accepter.getUniqueId();
-		HeadflipRequestData currentHeadflip = findHeadflip(accepterUUID);
+		HeadflipRequestData currentHeadflip = findHeadflipFor(accepterUUID);
 		
 		if(currentHeadflip == null)
 		{
@@ -79,18 +121,19 @@ public class HeadflipsHandler implements Listener
 			Player source = Bukkit.getPlayer(currentHeadflip.source);
 			if(source != null)
 			{
-				Headflip headflip = new Headflip(this,accepterUUID, currentHeadflip.source, main);
-				main.addListener(headflip);
+				Headflip headflip = new Headflip(this,accepterUUID, currentHeadflip.source, plugin);
+				plugin.addListener(headflip);
 			}
 			else
 			{
 				accepter.sendMessage(notFound);
 			}
-			RemoveAllHeadflipData(currentHeadflip);
+			removeRequest(currentHeadflip);
 		}
 		
 	}
-	public void collectHeadflip(Player source)
+	
+	public void tryCollectHeadflip(Player source)
 	{
 		UUID playerUUID = source.getUniqueId();
 		int i = 0;

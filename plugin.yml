@@ -1,6 +1,6 @@
 name: HappyIRL_Headflip
 version: 1.0
-main: de.happyirl.headflip.Main
+main: de.happyirl.headflip.HeadflipPlugin
 
 commands:
    headflip:
