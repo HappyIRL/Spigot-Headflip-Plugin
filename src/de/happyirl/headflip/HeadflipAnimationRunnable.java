@@ -1,17 +1,10 @@
 package de.happyirl.headflip;
 
-import java.util.List;
-
 import org.bukkit.Sound;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import de.happyirl.headflip.commands.Headflip;
 import de.happyirl.headflip.commands.HeadflipAnimationData;
-import de.happyirl.headflip.commands.HeadflipsHandler;
 
 
 

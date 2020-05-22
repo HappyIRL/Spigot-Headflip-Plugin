@@ -70,7 +70,7 @@ public class Headflip implements Listener
 	
 	
 	private HeadflipsHandler headflipsHandler;
-	private HeadflipPlugin main;
+	private HeadflipPlugin headflipPlugin;
 	private Headflip headflip;
 	
 	private List<BukkitTask> openInventoryTasks = new ArrayList<BukkitTask>();
@@ -91,15 +91,15 @@ public class Headflip implements Listener
 		CONFIRM_P2
 	}
 	
-	public Headflip(HeadflipsHandler headflipsHandler, UUID player1, UUID player2, HeadflipPlugin main)
+	public Headflip(HeadflipsHandler headflipsHandler, UUID player1, UUID player2, HeadflipPlugin headflipPlugin)
 	{
-		FileConfiguration config = main.getConfig();
+		FileConfiguration config = headflipPlugin.getConfig();
 		
 		this.cancelHeadflip = config.getString("headflip.cancelledHeadflip");
 		this.headflipInventoryName = config.getString("headflip.headflipInventoryName");
 		this.headflipAnimationName = config.getString("headflip.headflipAnimationName");
 		this.noWager = config.getString("headflip.noWager");
-		this.main = main;
+		this.headflipPlugin = headflipPlugin;
 		
 		this.headflipsHandler = headflipsHandler;
 		this.player1UUID = player1;
@@ -240,7 +240,7 @@ public class Headflip implements Listener
 	public void finishHeadflip()
 	{
 		startedHeadflip = false;
-		Bukkit.getScheduler().runTaskLater(main, new Runnable()
+		Bukkit.getScheduler().runTaskLater(headflipPlugin, new Runnable()
 		{
 			@Override
 			public void run()
@@ -397,6 +397,8 @@ public class Headflip implements Listener
 		Random random = new Random();
 		boolean player1Won = random.nextBoolean();
 		
+		saveResults(player1Won);
+		
 		createAnimationVisuals();
 		
 		headflipAnimationInventory = createInventory(27, headflipAnimationName, animation1Content);
@@ -405,6 +407,35 @@ public class Headflip implements Listener
 		player2.openInventory(headflipAnimationInventory);
 		
 		startHeadflipAnimation(items, player1Won);
+	}
+	
+	private void saveResults(boolean player1Won)
+	{
+		FileConfiguration headflipRatios = headflipPlugin.getHeadflipRatio();
+		
+		if(player1Won)
+		{
+			int playerWins = headflipRatios.getInt(player1UUID.toString() + ".wins");
+			int playerLosses = headflipRatios.getInt(player2UUID.toString() + ".losses");
+			
+			playerWins++;
+			playerLosses++;
+			
+			headflipRatios.set(player1UUID.toString() + ".wins", playerWins);
+			headflipRatios.set(player2UUID.toString() + ".losses", playerLosses);
+		}
+		else
+		{
+			int playerWins = headflipRatios.getInt(player2UUID.toString() + ".wins");
+			int playerLosses = headflipRatios.getInt(player1UUID.toString()+ ".losses");
+			
+			playerWins++;
+			playerLosses++;
+			
+			headflipRatios.set(player2UUID.toString() + ".wins", playerWins);
+			headflipRatios.set(player1UUID.toString() + ".losses", playerLosses);
+			
+		}
 	}
 
 	private void createAnimationVisuals() 
@@ -441,7 +472,7 @@ public class Headflip implements Listener
 			HeadflipAnimationData data = CreateAnimationData(items, player1Won, count, winningPhase);
 			HeadflipAnimationRunnable animation = new HeadflipAnimationRunnable(data);
 			
-			animation.runTaskTimer(main, delay, iterationRate);
+			animation.runTaskTimer(headflipPlugin, delay, iterationRate);
 			delay += count * iterationRate;
 		}
 	}
@@ -460,7 +491,7 @@ public class Headflip implements Listener
 		data.player1Won = player1Won;
 		data.headflipHandler = headflipsHandler;
 		data.items = items;
-		data.config = main.getConfig();
+		data.config = headflipPlugin.getConfig();
 		return data;
 	}
 
@@ -486,7 +517,7 @@ public class Headflip implements Listener
 
 	private void handleCloseInAnimation() 
 	{
-		BukkitTask openInventory = Bukkit.getScheduler().runTaskLater(main, new Runnable()
+		BukkitTask openInventory = Bukkit.getScheduler().runTaskLater(headflipPlugin, new Runnable()
 		{
 			@Override
 			public void run()
@@ -507,7 +538,7 @@ public class Headflip implements Listener
 			bukkitTask.cancel();
 		}
 		openInventoryTasks.clear();
-		Bukkit.getScheduler().runTaskLater(main, new Runnable()
+		Bukkit.getScheduler().runTaskLater(headflipPlugin, new Runnable()
 		{
 			@Override
 			public void run()
@@ -528,7 +559,7 @@ public class Headflip implements Listener
 		player1.sendMessage(cancelHeadflip);
 		player2.closeInventory();
 		player1.closeInventory();
-		Bukkit.getScheduler().runTaskLater(main, new Runnable()
+		Bukkit.getScheduler().runTaskLater(headflipPlugin, new Runnable()
 		{
 			@Override
 			public void run()

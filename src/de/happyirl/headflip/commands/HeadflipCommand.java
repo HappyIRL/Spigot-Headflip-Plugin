@@ -1,13 +1,18 @@
 package de.happyirl.headflip.commands;
 
+import java.util.UUID;
+
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+
+import de.happyirl.headflip.HeadflipPlugin;
 
 
 public class HeadflipCommand extends CustomCommand
 {
 	private HeadflipsHandler headflips;
+	private HeadflipPlugin headflipPlugin;
 	
 	private final String mustCollect;
 	private final String noRequest;
@@ -18,10 +23,11 @@ public class HeadflipCommand extends CustomCommand
 	private final String headflipRequest;
 	private final String notFound;
 	
-	public HeadflipCommand(HeadflipsHandler headflips, FileConfiguration config) 
+	public HeadflipCommand(HeadflipsHandler headflips, HeadflipPlugin headflipPlugin) 
     {
-        super(config);
+        super(headflipPlugin.getConfig());
         this.headflips = headflips;
+        this.headflipPlugin = headflipPlugin;
         this.mustCollect = config.getString("headflip.mustCollect");
         this.noRequest = config.getString("headflip.noRequest");
         this.headflipDenied = config.getString("headflip.headflipDenied");
@@ -54,14 +60,27 @@ public class HeadflipCommand extends CustomCommand
 			case "collect":
 				executeCollect(source);
 				break;
-			
+			case "stats":
+				getStats(source);
+				break;
 			default:
 				executePlayer(source, arg);
 				break;
 		}
-
 	}
 
+	private void getStats(Player source)
+	{
+		UUID sourceUUID = source.getUniqueId();
+		FileConfiguration headflipRatio = headflipPlugin.getHeadflipRatio();
+		int playerWins = headflipRatio.getInt(sourceUUID.toString() + ".wins");
+		int playerLosses = headflipRatio.getInt(sourceUUID.toString() + ".losses");
+		
+		int winRate = Math.round((playerWins / (playerWins + playerLosses)) * 100);
+		
+		source.sendMessage("§bYour wins: §a" + playerWins + "\n§bYour losses: §c" + playerLosses + "\n§bYou have a §a" + winRate + "% §bwin rate!");
+	}
+	
 	private void executePlayer(Player source, String arg) 
 	{
 		Player target = Bukkit.getPlayer(arg);
