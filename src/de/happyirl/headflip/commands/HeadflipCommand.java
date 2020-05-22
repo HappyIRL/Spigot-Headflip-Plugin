@@ -63,6 +63,9 @@ public class HeadflipCommand extends CustomCommand
 			case "stats":
 				getStats(source);
 				break;
+			case "help":
+				executePlayer(source);
+				break;
 			default:
 				executePlayer(source, arg);
 				break;
@@ -73,12 +76,17 @@ public class HeadflipCommand extends CustomCommand
 	{
 		UUID sourceUUID = source.getUniqueId();
 		FileConfiguration headflipRatio = headflipPlugin.getHeadflipRatio();
-		int playerWins = headflipRatio.getInt(sourceUUID.toString() + ".wins");
-		int playerLosses = headflipRatio.getInt(sourceUUID.toString() + ".losses");
+		float playerWins = (float) headflipRatio.getInt(sourceUUID.toString() + ".wins");
+		float playerLosses = (float) headflipRatio.getInt(sourceUUID.toString() + ".losses");
 		
-		int winRate = Math.round((playerWins / (playerWins + playerLosses)) * 100);
+		int winRate = Math.round(playerWins / (playerWins + playerLosses) * 100f);
 		
 		source.sendMessage("§bYour wins: §a" + playerWins + "\n§bYour losses: §c" + playerLosses + "\n§bYou have a §a" + winRate + "% §bwin rate!");
+	}
+	
+	private void executePlayer(Player source)
+	{
+		source.sendMessage("§b/headflip <player>\n/headflip accept\n/headflip deny\n/headflip collect\n/headflip stats");
 	}
 	
 	private void executePlayer(Player source, String arg) 
