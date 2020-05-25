@@ -14,9 +14,9 @@ public class CustomCommand implements CommandExecutor
 	protected int parameters;
 	protected FileConfiguration config;
 	
-	private final String noPermission = "headflip.noPermission";
-	private final String toManyParameters = "headflip.toManyParameters";
-	private final String nonPlayer = "headflip.nonPlayer";
+	private static final String NO_PERMISSION = "headflip.noPermission";
+	private static final String TO_MANY_PARAMETERS = "headflip.toManyParameters";
+	private static final String NON_PLAYER = "headflip.nonPlayer";
 	
 	public CustomCommand(FileConfiguration config)
 	{
@@ -27,17 +27,17 @@ public class CustomCommand implements CommandExecutor
 	{			
 		if(!sender.hasPermission(permission))
 		{
-			sender.sendMessage("§e" + sender.getName() + config.get(noPermission));
+			sender.sendMessage("§e" + sender.getName() + config.get(NO_PERMISSION));
 			return false;
 		}
 		if(args.length != parameters)
 		{
-			sender.sendMessage("§e" + sender.getName() + config.get(toManyParameters));
+			sender.sendMessage("§e" + sender.getName() + config.get(TO_MANY_PARAMETERS));
 			return false;
 		}
 		if(playerOnly && !(sender instanceof Player))
 		{
-			sender.sendMessage("§e" + sender.getName() + config.get(nonPlayer));
+			sender.sendMessage("§e" + sender.getName() + config.get(NON_PLAYER));
 			return false;
 		}
 		if(playerOnly)
